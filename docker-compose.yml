@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+
+  cloud:
+    build:
+      context: ./cloud
+      dockerfile: Dockerfile
+    container_name: cloud
+    ports:
+      - "5013:5013"
+    environment:
+      CLOUD_NAME: "Cloud Aggregator"
+      CLOUD_PORT: 5013
+      EDGE1_HOST: edge1
+      EDGE1_PORT: 5009
+      EDGE2_HOST: edge2
+      EDGE2_PORT: 5011
+    networks:
+      - federated_net
+
+  edge1:
+    build:
+      context: ./edge
+      dockerfile: Dockerfile
+    container_name: edge1
+    ports:
+      - "5009:5009"
+    environment:
+      EDGE_NAME: "Edge 1"
+      EDGE_PORT: 5009
+      CLOUD_HOST: cloud
+      CLOUD_PORT: 5013
+      CLIENT_A_HOST: client_a
+      CLIENT_B_HOST: client_b
+    networks:
+      - federated_net
+    depends_on:
+      - cloud
+     
+
+  edge2:
+    build:
+      context: ./edge
+      dockerfile: Dockerfile
+    container_name: edge2
+    ports:
+      - "5011:5011"
+    environment:
+      EDGE_NAME: "Edge 2"
+      EDGE_PORT: 5011
+      CLOUD_HOST: cloud
+      CLOUD_PORT: 5013
+      CLIENT_C_HOST: client_c
+      CLIENT_D_HOST: client_d
+    networks:
+      - federated_net
+    depends_on:
+      - cloud
+   
+
+  client_a:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client_a
+    ports:
+      - "5001:5001"
+    environment:
+      CLIENT_NAME: "Client A"
+      CLIENT_PORT: 5001
+      EDGE_HOST: edge1
+      EDGE_PORT: 5009
+      BASELINE_SLOPE: 2
+      BASELINE_INTERCEPT: 5
+    networks:
+      - federated_net
+    depends_on:
+      - edge1
+
+  client_b:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client_b
+    ports:
+      - "5003:5003"
+    environment:
+      CLIENT_NAME: "Client B"
+      CLIENT_PORT: 5003
+      EDGE_HOST: edge1
+      EDGE_PORT: 5009
+      BASELINE_SLOPE: 2
+      BASELINE_INTERCEPT: 2
+    networks:
+      - federated_net
+    depends_on:
+      - edge1
+
+  client_c:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client_c
+    ports:
+      - "5005:5005"
+    environment:
+      CLIENT_NAME: "Client C"
+      CLIENT_PORT: 5005
+      EDGE_HOST: edge2
+      EDGE_PORT: 5011
+      BASELINE_SLOPE: 3
+      BASELINE_INTERCEPT: 5
+    networks:
+      - federated_net
+    depends_on:
+      - edge2
+
+  client_d:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client_d
+    ports:
+      - "5007:5007"
+    environment:
+      CLIENT_NAME: "Client D"
+      CLIENT_PORT: 5007
+      EDGE_HOST: edge2
+      EDGE_PORT: 5011
+      BASELINE_SLOPE: 3
+      BASELINE_INTERCEPT: 5
+    networks:
+      - federated_net
+    depends_on:
+      - edge2
+
+networks:
+  federated_net:
+    driver: bridge

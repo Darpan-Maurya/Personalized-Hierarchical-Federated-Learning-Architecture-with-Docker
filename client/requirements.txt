@@ -1,0 +1,9 @@
+numpy
+torch
+torchvision
+flask
+requests
+argparse
+tqdm
+tensorboardX
+pandas
