@@ -10,7 +10,7 @@ COPY static /app/static
 
 
 # Install Flask
-RUN pip install flask requests
+RUN pip install flask requests pymongo
 
 # Expose the default client port
 EXPOSE 5000

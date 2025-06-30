@@ -59,13 +59,13 @@ def aggregate_and_send_to_cloud():
         "intercept": round(total_intercept / count, 4)
     }
 
-    print(f"[{EDGE_NAME}] 📤 Sending local model to cloud: {local_model}")
+    print(f"[{EDGE_NAME}]  Sending local model to cloud: {local_model}")
     try:
         res = requests.post(f"{CLOUD_URL}/receive_from_edge", json={
             "edge": EDGE_NAME,
             "model": local_model
         })
-        print(f"[{EDGE_NAME}] ☁️ Cloud responded: {res.json()}")
+        print(f"[{EDGE_NAME}]  Cloud responded: {res.json()}")
         return jsonify({"status": "sent", "cloud_response": res.json()})
     except Exception as e:
         print(f"[{EDGE_NAME}]  Failed to send to cloud: {e}")
@@ -196,7 +196,14 @@ def auto_send_to_cloud():
     else:
         print(f"[{EDGE_NAME}]  No client models at startup.")
 
+def auto_send_periodically():
+    while True:
+        try:
+            auto_send_to_cloud()  # Your actual logic
+        except Exception as e:
+            print(f"Error in auto_send_to_cloud: {e}")
+        time.sleep(80)  
 
 if __name__ == '__main__':
-    threading.Thread(target=auto_send_to_cloud).start()
+    threading.Thread(target=auto_send_periodically,daemon=True).start()
     app.run(host='0.0.0.0', port=EDGE_PORT)

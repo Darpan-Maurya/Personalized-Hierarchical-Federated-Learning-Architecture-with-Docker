@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - federated_net
 
   cloud:
     build:
@@ -18,7 +26,7 @@ services:
       EDGE2_PORT: 5011
     networks:
       - federated_net
-
+ 
   edge1:
     build:
       context: ./edge
@@ -67,6 +75,7 @@ services:
     ports:
       - "5001:5001"
     environment:
+      MONGO_URI: "mongodb://mongo:27017/"
       CLIENT_NAME: "Client A"
       CLIENT_PORT: 5001
       EDGE_HOST: edge1
@@ -86,6 +95,7 @@ services:
     ports:
       - "5003:5003"
     environment:
+      MONGO_URI: "mongodb://mongo:27017/"
       CLIENT_NAME: "Client B"
       CLIENT_PORT: 5003
       EDGE_HOST: edge1
@@ -105,6 +115,7 @@ services:
     ports:
       - "5005:5005"
     environment:
+      MONGO_URI: "mongodb://mongo:27017/"
       CLIENT_NAME: "Client C"
       CLIENT_PORT: 5005
       EDGE_HOST: edge2
@@ -124,6 +135,7 @@ services:
     ports:
       - "5007:5007"
     environment:
+      MONGO_URI: "mongodb://mongo:27017/"
       CLIENT_NAME: "Client D"
       CLIENT_PORT: 5007
       EDGE_HOST: edge2
@@ -134,7 +146,8 @@ services:
       - federated_net
     depends_on:
       - edge2
-
+volumes:
+  mongo_data:
 networks:
   federated_net:
     driver: bridge
