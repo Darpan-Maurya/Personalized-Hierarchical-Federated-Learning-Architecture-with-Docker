@@ -14,12 +14,23 @@ EDGE_HOST = os.environ.get("EDGE_HOST", "edge")
 EDGE_PORT = int(os.environ.get("EDGE_PORT", 8000))
 EDGE_URL = f"http://{EDGE_HOST}:{EDGE_PORT}"
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://mongo:27017/")
-mongo_client = MongoClient(MONGO_URI)
-db = mongo_client["federated_db"]
-model_collection = db[f"{CLIENT_NAME}_models"]
 
-last_model_doc = model_collection.find_one(sort=[("timestamp", -1)])
+# Add this function at the top
+def get_model_collection():
+    MONGO_URI = os.environ.get("MONGO_URI", "mongodb://mongo:27017/")
+    client_name = os.environ.get("CLIENT_NAME", "client_x")
+    mongo_client = MongoClient(MONGO_URI)
+    db = mongo_client["federated_db"]
+    return db[f"{client_name}_models"]
+
+
+try:
+    model_collection = get_model_collection()
+    last_model_doc = model_collection.find_one(sort=[("timestamp", -1)])
+except Exception as e:
+    print(f"MongoDB not available: {e}")
+    model_collection = None
+    last_model_doc = None
 
 if last_model_doc:
     BASELINE_MODEL = {
@@ -48,25 +59,30 @@ def send_to_edge():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/receive_personalized', methods=['POST'])
 def receive_personalized():
     global personalized_model
     data = request.json
-    new_model= data.get("model", {})
-    
+    new_model = data.get("model", {})
+
     if personalized_model != new_model:
         print(f"[{CLIENT_NAME}]  New personalized model received: {new_model}")
         personalized_model = new_model
-        
-        # Save to MongoDB only if different
-        model_collection.insert_one({
-            "timestamp": time.time(),
-            "model": personalized_model
-        })
+
+        try:
+            collection = get_model_collection() 
+            collection.insert_one({
+                "timestamp": time.time(),
+                "model": personalized_model
+            })
+        except Exception as e:
+            print(f"[{CLIENT_NAME}] MongoDB insert failed: {e}")
     else:
         print(f"[{CLIENT_NAME}]  Received personalized model: {personalized_model}")
-        
+
     return jsonify({"status": "received", "personalized_model": personalized_model})
+
 
 @app.route('/update', methods=['POST'])
 def update():

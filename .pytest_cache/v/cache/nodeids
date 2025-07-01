@@ -1,0 +1,19 @@
+[
+  "client/tests/test_client.py::test_index_page",
+  "client/tests/test_client.py::test_init",
+  "client/tests/test_client.py::test_receive_personalized",
+  "client/tests/test_client.py::test_receive_personalized_same_model_skips_insert",
+  "client/tests/test_client.py::test_send_to_edge",
+  "client/tests/test_client.py::test_update",
+  "cloud/tests/test_cloud.py::test_receive_from_edge",
+  "cloud/tests/test_cloud.py::test_receive_from_edge_empty_payload",
+  "cloud/tests/test_cloud.py::test_receive_from_edge_missing_edge",
+  "cloud/tests/test_cloud.py::test_receive_from_edge_missing_model",
+  "cloud/tests/test_cloud.py::test_receive_from_edge_success",
+  "cloud/tests/test_cloud.py::test_receive_from_edge_wrong_type",
+  "edge/tests/test_edge.py::test_receive_from_client",
+  "edge/tests/test_edge.py::test_receive_global",
+  "edge/tests/test_edge.py::test_receive_global_fails_without_local_model",
+  "edge/tests/test_edge.py::test_send_to_cloud_with_clients",
+  "edge/tests/test_edge.py::test_send_to_cloud_without_clients"
+]

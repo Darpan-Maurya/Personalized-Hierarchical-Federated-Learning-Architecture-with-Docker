@@ -50,7 +50,14 @@ def broadcast_global_model():
 # --------- Flask Routes ---------
 @app.route('/receive_from_edge', methods=['POST'])
 def receive_from_edge():
-    data = request.json
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({"error": "Invalid payload"}), 400
+    
+    if not data or 'edge' not in data or 'model' not in data:
+        return jsonify({"error": "Invalid payload"}), 400
+    
     edge = data['edge']
     model = data['model']
     edge_models[edge] = model
